@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationListener {
+public class PasswordResetListener {
 
     private final EmailService emailService;
 

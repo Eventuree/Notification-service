@@ -3,6 +3,7 @@ package eventure.notificationservice.service.impl;
 import jakarta.mail.internet.MimeMessage;
 import eventure.notificationservice.exception.EmailSendException;
 import eventure.notificationservice.service.EmailService;
+import eventure.notificationservice.service.component.EmailContentBuilder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.util.Map;
 
@@ -21,7 +20,7 @@ import java.util.Map;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
+    private final EmailContentBuilder emailContentBuilder;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -58,14 +57,8 @@ public class EmailServiceImpl implements EmailService {
                                  String templateName,
                                  Map<String, Object> variables) {
         try {
-            Context context = new Context();
-            context.setVariables(variables);
-
-            String htmlTemplate = "mail/" + templateName + ".html";
-            String textTemplate = "mail/" + templateName + ".txt";
-
-            String htmlBody = templateEngine.process(htmlTemplate, context);
-            String textBody = templateEngine.process(textTemplate, context);
+            String htmlBody = emailContentBuilder.buildHtmlContent(templateName, variables);
+            String textBody = emailContentBuilder.buildTextContent(templateName, variables);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
