@@ -1,0 +1,15 @@
+Subject: Welcome to Eventure!
+
+Hello [(${fullName})],
+
+Congratulations! Your account has been successfully created. We are thrilled to have you join the Eventure community.
+
+You can now start exploring, creating, and managing your events with ease. To get started, please visit your dashboard:
+
+If you have any questions, feel free to reply to this email.
+
+Best regards,
+The Eventure Team
+
+---
+This is an automated message to confirm your registration.

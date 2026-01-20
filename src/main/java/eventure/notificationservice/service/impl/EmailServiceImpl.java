@@ -1,5 +1,6 @@
 package eventure.notificationservice.service.impl;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import eventure.notificationservice.exception.EmailSendException;
 import eventure.notificationservice.service.EmailService;
@@ -29,11 +30,17 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.password-reset.frontend-url}")
     private String resetBaseUrl;
 
-    @Value("${app.password-reset.mail.subject}")
+    @Value("${mail.subject.password-reset}")
     private String resetPasswordSubject;
 
-    @Value("${app.password-reset.template-name}")
+    @Value("${mail.template.password-reset}")
     private String resetPasswordTemplateName;
+
+    @Value("${mail.template.user-registration}")
+    private String userRegistrationSubject;
+
+    @Value("${mail.subject.user-registration}")
+    private String userRegistrationTemplateName;
 
 
     @Override
@@ -48,6 +55,22 @@ public class EmailServiceImpl implements EmailService {
                 userEmail,
                 resetPasswordSubject,
                 resetPasswordTemplateName,
+                vars
+        );
+    }
+
+    @Override
+    public void sendRegistrationMail(String userEmail, String firstName, String lastName) {
+        String fullName = firstName + " " + lastName;
+
+        Map<String, Object> vars = Map.of(
+                "fullName", fullName
+        );
+
+        sendTemplateMail(
+                userEmail,
+                userRegistrationSubject,
+                userRegistrationTemplateName,
                 vars
         );
     }
@@ -78,7 +101,7 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(mimeMessage);
             log.info("Email '{}' sent to {}", subject, to);
 
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             log.error("Failed to send email '{}' to {}", subject, to, e);
             throw new EmailSendException("Could not send email", e);
         }
