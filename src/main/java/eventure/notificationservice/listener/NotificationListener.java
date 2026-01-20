@@ -20,7 +20,7 @@ public class NotificationListener {
     public void handlePasswordReset(PasswordResetEventDto event) {
         log.info("Received password reset request for: {}", event.getEmail());
         try {
-            emailService.sendPasswordResetEmail(event);
+            emailService.sendPasswordResetMail(event.getEmail(), event.getToken());
         } catch (Exception e) {
             log.error("Error processing email for {}. Message will be retried or sent to DLQ.", event.getEmail(), e);
             throw new EmailSendException("Failed to send password reset email", e);

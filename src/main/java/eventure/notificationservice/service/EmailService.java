@@ -1,8 +1,9 @@
 package eventure.notificationservice.service;
 
-import eventure.notificationservice.dto.PasswordResetEventDto;
+import java.util.Map;
 
 public interface EmailService {
-    void sendPasswordResetEmail(PasswordResetEventDto event);
+    void sendPasswordResetMail(String userEmail, String rawToken);
 
+    void sendTemplateMail(String to, String subject, String templateName, Map<String, Object> variables);
 }

@@ -1,17 +1,19 @@
 package eventure.notificationservice.service.impl;
 
-import eventure.notificationservice.service.EmailService;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import eventure.notificationservice.exception.EmailSendException;
+import eventure.notificationservice.service.EmailService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import eventure.notificationservice.dto.PasswordResetEventDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,31 +29,58 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.password-reset.frontend-url}")
     private String resetBaseUrl;
 
-    public void sendPasswordResetEmail(PasswordResetEventDto event) {
-        try {
-            String resetLink = resetBaseUrl + "?token=" + event.getToken();
+    @Value("${app.password-reset.mail.subject}")
+    private String resetPasswordSubject;
 
-            Context context = new Context();
-            context.setVariable("resetLink", resetLink);
-            context.setVariable("name", event.getFullName());
+    @Value("${app.password-reset.template-name}")
+    private String resetPasswordTemplateName;
 
-            String htmlBody = templateEngine.process("mail/password-reset", context);
 
-            sendHtmlEmail(event.getEmail(), "Password Reset Request", htmlBody);
+    @Override
+    public void sendPasswordResetMail(String userEmail, String rawToken) {
+        String resetLink = resetBaseUrl + "?token=" + rawToken;
 
-        } catch (MessagingException e) {
-            log.error("Failed to send email to {}", event.getEmail(), e);
-        }
+        Map<String, Object> vars = Map.of(
+                "resetLink", resetLink
+        );
+
+        sendTemplateMail(
+                userEmail,
+                resetPasswordSubject,
+                resetPasswordTemplateName,
+                vars
+        );
     }
 
-    private void sendHtmlEmail(String to, String subject, String htmlBody) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(fromEmail);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(htmlBody, true);
-        mailSender.send(message);
-        log.info("Email sent to {}", to);
+    @Override
+    public void sendTemplateMail(String to,
+                                 String subject,
+                                 String templateName,
+                                 Map<String, Object> variables) {
+        try {
+            Context context = new Context();
+            context.setVariables(variables);
+
+            String htmlTemplate = "mail/" + templateName + ".html";
+            String textTemplate = "mail/" + templateName + ".txt";
+
+            String htmlBody = templateEngine.process(htmlTemplate, context);
+            String textBody = templateEngine.process(textTemplate, context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(textBody, htmlBody);
+
+            mailSender.send(mimeMessage);
+            log.info("Email '{}' sent to {}", subject, to);
+
+        } catch (Exception e) {
+            log.error("Failed to send email '{}' to {}", subject, to, e);
+            throw new EmailSendException("Could not send email", e);
+        }
     }
 }
