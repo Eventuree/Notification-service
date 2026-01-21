@@ -2,7 +2,6 @@ package eventure.notificationservice.listener;
 
 
 import eventure.notificationservice.dto.PasswordResetEventDto;
-import eventure.notificationservice.dto.UserRegistrationDto;
 import eventure.notificationservice.exception.EmailSendException;
 import eventure.notificationservice.service.NotificationService;
 import lombok.RequiredArgsConstructor;
