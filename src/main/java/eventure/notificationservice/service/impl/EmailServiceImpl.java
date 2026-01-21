@@ -11,10 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,74 +18,13 @@ import java.util.Map;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    @Value("${app.password-reset.frontend-url}")
-    private String resetBaseUrl;
-
-    @Value("${mail.subject.password-reset}")
-    private String resetPasswordSubject;
-
-    @Value("${mail.template.password-reset}")
-    private String resetPasswordTemplateName;
-
-    @Value("${mail.template.user-registration}")
-    private String userRegistrationSubject;
-
-    @Value("${mail.subject.user-registration}")
-    private String userRegistrationTemplateName;
-
-
     @Override
-    public void sendPasswordResetMail(String userEmail, String rawToken) {
-        String resetLink = resetBaseUrl + "?token=" + rawToken;
-
-        Map<String, Object> vars = Map.of(
-                "resetLink", resetLink
-        );
-
-        sendTemplateMail(
-                userEmail,
-                resetPasswordSubject,
-                resetPasswordTemplateName,
-                vars
-        );
-    }
-
-    @Override
-    public void sendRegistrationMail(String userEmail, String firstName, String lastName) {
-        String fullName = firstName + " " + lastName;
-
-        Map<String, Object> vars = Map.of(
-                "fullName", fullName
-        );
-
-        sendTemplateMail(
-                userEmail,
-                userRegistrationSubject,
-                userRegistrationTemplateName,
-                vars
-        );
-    }
-
-    @Override
-    public void sendTemplateMail(String to,
-                                 String subject,
-                                 String templateName,
-                                 Map<String, Object> variables) {
+    public void sendEmail(String to, String subject, String htmlBody, String textBody) {
         try {
-            Context context = new Context();
-            context.setVariables(variables);
-
-            String htmlTemplate = "mail/" + templateName + ".html";
-            String textTemplate = "mail/" + templateName + ".txt";
-
-            String htmlBody = templateEngine.process(htmlTemplate, context);
-            String textBody = templateEngine.process(textTemplate, context);
-
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -102,7 +37,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Email '{}' sent to {}", subject, to);
 
         } catch (MessagingException e) {
-            log.error("Failed to send email '{}' to {}", subject, to, e);
+            log.error("Failed to send email to {}", to, e);
             throw new EmailSendException("Could not send email", e);
         }
     }

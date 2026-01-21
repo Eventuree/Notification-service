@@ -1,0 +1,10 @@
+Hello [(${userName})],
+
+The status of your registration for the event "[(${eventTitle})]" has been updated.
+
+New Status: [(${newStatus})]
+
+Please visit the application to view more details.
+
+Best regards,
+Eventure Team
