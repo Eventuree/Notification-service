@@ -1,9 +1,10 @@
 package eventure.notificationservice.service.impl;
 
-import eventure.notificationservice.exception.EmailSendException;
-import eventure.notificationservice.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import eventure.notificationservice.exception.EmailSendException;
+import eventure.notificationservice.service.EmailService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

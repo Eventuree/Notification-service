@@ -2,6 +2,7 @@ package eventure.notificationservice.service.impl;
 
 import eventure.notificationservice.dto.PasswordResetEventDto;
 import eventure.notificationservice.dto.StatusChangeNotificationDto;
+import eventure.notificationservice.dto.UserRegistrationDto;
 import eventure.notificationservice.service.EmailService;
 import eventure.notificationservice.service.NotificationService;
 import eventure.notificationservice.service.component.EmailContentBuilder;
@@ -25,10 +26,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${app.password-reset.template-name}")
     private String resetPasswordTemplateName;
 
-    @Value("${app.status-change.mail.subject}")
+    @Value("${mail.subject.status-change}")
     private String statusChangeSubject;
-    @Value("${app.status-change.template-name}")
+    @Value("${mail.template.status-change}")
     private String statusChangeTemplateName;
+
+    @Value("${mail.subject.user-registration}")
+    private String userRegistrationSubject;
+
+    @Value("${mail.template.user-registration}")
+    private String userRegistrationTemplateName;
 
     @Override
     public void sendPasswordResetNotification(PasswordResetEventDto dto) {
@@ -47,6 +54,17 @@ public class NotificationServiceImpl implements NotificationService {
         );
 
         processAndSend(dto.getUserEmail(), statusChangeSubject, statusChangeTemplateName, vars);
+    }
+
+    @Override
+    public void sendRegistrationNotification(UserRegistrationDto dto) {
+        String fullName = dto.getFirstName() + " " + dto.getLastName();
+
+        Map<String, Object> vars = Map.of(
+                "fullName", fullName
+        );
+
+        processAndSend(dto.getEmail(), userRegistrationSubject, userRegistrationTemplateName, vars);
     }
 
     private void processAndSend(String to, String subject, String templateName, Map<String, Object> vars) {
