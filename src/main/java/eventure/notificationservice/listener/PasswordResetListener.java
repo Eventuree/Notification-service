@@ -27,18 +27,4 @@ public class PasswordResetListener {
             throw new EmailSendException("Failed to send password reset email", e);
         }
     }
-
-    @RabbitListener(queues = "${rabbitmq.queue.user-registration}")
-    public void handleRegistration(UserRegistrationDto message) {
-        log.info("Received registration message: userId = {}, userEmail = {}", message.getUserId(), message.getEmail());
-        try {
-            emailService.sendRegistrationMail(message.getEmail(),
-                    message.getFirstName(),
-                    message.getLastName());
-        }
-        catch (Exception e) {
-            log.error("Error processing email for {}. Message will be retried or sent to DLQ.", message.getEmail());
-            throw new EmailSendException("Failed to send registration email", e);
-        }
-    }
 }
