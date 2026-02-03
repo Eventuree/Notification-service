@@ -1,6 +1,7 @@
 package eventure.notificationservice.service.impl;
 
 import eventure.notificationservice.dto.PasswordResetEventDto;
+import eventure.notificationservice.dto.RatingReminderDto;
 import eventure.notificationservice.dto.StatusChangeNotificationDto;
 import eventure.notificationservice.service.EmailService;
 import eventure.notificationservice.service.NotificationService;
@@ -18,8 +19,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailService emailService;
     private final EmailContentBuilder contentBuilder;
 
-    @Value("${app.password-reset.frontend-url}")
-    private String resetBaseUrl;
     @Value("${app.password-reset.mail.subject}")
     private String resetPasswordSubject;
     @Value("${app.password-reset.template-name}")
@@ -30,9 +29,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${app.status-change.template-name}")
     private String statusChangeTemplateName;
 
+    @Value("${app.frontend-url}")
+    private String eventBaseUrl;
+    @Value("${app.rating-reminder.mail.subject}")
+    private String ratingReminderSubject;
+    @Value("${app.rating-reminder.template-name}")
+    private String ratingReminderTemplateName;
+
     @Override
     public void sendPasswordResetNotification(PasswordResetEventDto dto) {
-        String resetLink = resetBaseUrl + "?token=" + dto.getToken();
+        String resetLink = eventBaseUrl + "/reset-password?token=" + dto.getToken();
         Map<String, Object> vars = Map.of("resetLink", resetLink);
 
         processAndSend(dto.getEmail(), resetPasswordSubject, resetPasswordTemplateName, vars);
@@ -47,6 +53,19 @@ public class NotificationServiceImpl implements NotificationService {
         );
 
         processAndSend(dto.getUserEmail(), statusChangeSubject, statusChangeTemplateName, vars);
+    }
+
+    @Override
+    public void sendRatingReminderNotification(RatingReminderDto dto) {
+        String eventLink = eventBaseUrl + "/events/" + dto.getEventId() + "/dashboard";
+
+        Map<String, Object> vars = Map.of(
+                "userName", dto.getUserName(),
+                "eventTitle", dto.getEventTitle(),
+                "eventLink", eventLink
+        );
+
+        processAndSend(dto.getEmail(), ratingReminderSubject, ratingReminderTemplateName, vars);
     }
 
     private void processAndSend(String to, String subject, String templateName, Map<String, Object> vars) {
