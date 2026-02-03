@@ -18,8 +18,14 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.queue.status-change}")
     private String statusChangeQueue;
 
+    @Value("${rabbitmq.queue.rating-reminder}")
+    private String ratingReminderQueue;
+
     @Value("${rabbitmq.routing-key.status-change}")
     private String statusChangeRoutingKey;
+
+    @Value("${rabbitmq.routing-key.rating-reminder}")
+    private String ratingReminderRoutingKey;
 
     @Value("${rabbitmq.exchange.user-events}")
     private String userEventsExchange;
@@ -38,6 +44,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue ratingReminderQueue() {
+        return QueueBuilder.durable(ratingReminderQueue).build();
+    }
+
+    @Bean
     public TopicExchange userEventsExchange() {
         return new TopicExchange(userEventsExchange);
     }
@@ -48,6 +59,14 @@ public class RabbitMQConfig {
                 .bind(statusChangeQueue())
                 .to(userEventsExchange())
                 .with(statusChangeRoutingKey);
+    }
+
+    @Bean
+    public Binding ratingReminderBinding() {
+        return BindingBuilder
+                .bind(ratingReminderQueue())
+                .to(userEventsExchange())
+                .with(ratingReminderRoutingKey);
     }
 
     @Bean

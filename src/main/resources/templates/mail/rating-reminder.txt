@@ -1,0 +1,13 @@
+Hello ${userName},
+
+Thank you for attending "${eventTitle}"!
+
+We'd love to hear about your experience. Your feedback helps us improve future events and helps other users make informed decisions.
+
+Please rate this event by visiting:
+${eventLink}
+
+It only takes a minute and really helps the community!
+
+Best regards,
+Eventure Team
